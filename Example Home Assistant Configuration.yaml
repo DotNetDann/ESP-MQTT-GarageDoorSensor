@@ -1,0 +1,55 @@
+mqtt:
+  broker: your.mqtt.ip.address
+  port: 1883
+  client_id: home-assistant-1
+  username: YOURUSERNAME
+  password: YOURPASSWORD
+
+cover:
+  - platform: mqtt
+    name: "Garage Door 1"
+    state_topic: "GarDoor/1/status/value"
+    command_topic: "GarDoor/1/action"
+    availability_topic: "GarDoor/availability"
+    qos: 0
+    optimistic: false
+    retain: false
+    payload_open: "OPEN"
+    payload_close: "CLOSE"
+    payload_stop: "STATE"
+    state_open: "open"
+    state_closed: "closed"
+    payload_available: "online"
+    payload_not_available: "offline"
+
+  - platform: mqtt
+    name: "Garage Door 2"
+    state_topic: "GarDoor/2/status/value"
+    command_topic: "GarDoor/2/action"
+    availability_topic: "GarDoor/availability"
+    qos: 0
+    optimistic: false
+    retain: false
+    payload_open: "OPEN"
+    payload_close: "CLOSE"
+    payload_stop: "STATE"
+    state_open: "open"
+    state_closed: "closed"
+    payload_available: "online"
+    payload_not_available: "offline"
+
+  - platform: mqtt
+    name: "Garage Door 3"
+    state_topic: "GarDoor/3/status/value"
+    command_topic: "GarDoor/3/action"
+    availability_topic: "GarDoor/availability"
+    qos: 0
+    optimistic: false
+    retain: false
+    payload_open: "OPEN"
+    payload_close: "CLOSE"
+    payload_stop: "STATE"
+    state_open: "open"
+    state_closed: "closed"
+    payload_available: "online"
+    payload_not_available: "offline"
