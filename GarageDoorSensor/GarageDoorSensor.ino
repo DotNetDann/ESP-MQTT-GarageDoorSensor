@@ -1,11 +1,3 @@
-// From: https://hackaday.io/project/25090/instructions
-
-
-// Send status messages every 5 mins - incase HASS has restarted
-
-
-
-
 /*
   To use this code you will need the following dependencies: 
   
@@ -17,12 +9,14 @@
       - Ultrasonic by Erick Simões
       - PubSubClient
       - ArduinoJSON
+
+  - Another like project https://hackaday.io/project/25090/instructions
 */
 
 // ------------------------------
 // ---- all config in auth.h ----
 // ------------------------------
-#define VERSION F("v1.1 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
+#define VERSION F("v1.2 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
 
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
@@ -32,7 +26,6 @@
 #include <Ultrasonic.h> // Ultrasonic by Erick Simões
 #include <ArduinoOTA.h>
 #include "auth.h"
-
 
 #define DOOR_UNKNOWN         0x00
 #define DOOR_OPENED          0x01
@@ -50,7 +43,6 @@ int door3_lastDistanceValue = 0;
 char* birthMessage = "online";
 const char* lwtMessage = "offline";
 
-
 /******************************** GLOBAL OBJECTS *******************************/
 
 Ultrasonic ultrasonic1(DOOR_TRIG_PIN, DOOR1_ECHO_PIN, ULTRASONIC_TIMEOUT);
@@ -59,8 +51,6 @@ Ultrasonic ultrasonic3(DOOR_TRIG_PIN, DOOR3_ECHO_PIN, ULTRASONIC_TIMEOUT);
 WiFiClient espClient;
 PubSubClient client(espClient);
 ESP8266WebServer server(80);
-
-
 
 // Get the state of the garage based upon the sensor distance
 byte getState(int distance)
@@ -89,16 +79,16 @@ void setup() {
 
   // Setup Door 1 pins
   pinMode(DOOR1_RELAY_PIN, OUTPUT);
-  digitalWrite(DOOR1_RELAY_PIN, LOW);
+  digitalWrite(DOOR1_RELAY_PIN, HIGH);
 
   #if DOOR2_ENABLED == true
     pinMode(DOOR2_RELAY_PIN, OUTPUT);
-    digitalWrite(DOOR2_RELAY_PIN, LOW);
+    digitalWrite(DOOR2_RELAY_PIN, HIGH);
   #endif
 
   #if DOOR3_ENABLED == true
     pinMode(DOOR3_RELAY_PIN, OUTPUT);
-    digitalWrite(DOOR3_RELAY_PIN, LOW);
+    digitalWrite(DOOR3_RELAY_PIN, HIGH);
   #endif
   
   setup_wifi();
@@ -290,9 +280,9 @@ void Publish(char* topic, char* message) {
 
 /********************************** START RELAY *****************************************/
 void toggleRelay(int pin) {
-    digitalWrite(pin, HIGH);
-    delay(RELAY_ACTIVE_TIMEOUT);
     digitalWrite(pin, LOW);
+    delay(RELAY_ACTIVE_TIMEOUT);
+    digitalWrite(pin, HIGH);
 }
 
 
@@ -349,12 +339,15 @@ void reconnect() {
 void check_door_status() {
 
   // ---- Door 1 ----
-  int distance = ultrasonic1.distanceRead(); // random(200);
+  int distance = ultrasonic1.distanceRead();
   byte state = getState(distance);
   delay(VERIFICATION_INTERVAL);
-  byte stateVerify = ultrasonic1.distanceRead()); // getState(random(200));
+  byte stateVerify = getState(ultrasonic1.distanceRead());
 
-  if ((state == stateVerify) && (state != getState(door1_lastDistanceValue))) {
+  Serial.print(distance);
+  Serial.print(".");
+  
+  if ((distance > 0) && (state == stateVerify) && (state != getState(door1_lastDistanceValue))) {
     digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
     door1_lastDistanceValue = distance;
     sendState(1);
@@ -368,8 +361,11 @@ void check_door_status() {
     state = getState(distance);
     delay(VERIFICATION_INTERVAL);
     stateVerify = getState(ultrasonic2.distanceRead());
-    
-    if ((state == stateVerify) && (state != getState(door2_lastDistanceValue))) {
+
+    Serial.print(distance);
+    Serial.print(".");
+
+    if ((distance > 0) && (state == stateVerify) && (state != getState(door2_lastDistanceValue))) {
       digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
       door2_lastDistanceValue = distance;
       sendState(2);
@@ -384,17 +380,20 @@ void check_door_status() {
     state = getState(distance);
     delay(VERIFICATION_INTERVAL);
     stateVerify = getState(ultrasonic3.distanceRead());
-    
-    if ((state == stateVerify) && (state != getState(door3_lastDistanceValue))) {
+
+    Serial.print(distance);
+    Serial.print(".");
+
+    if ((distance > 0) && (state == stateVerify) && (state != getState(door3_lastDistanceValue))) {
       digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
       door3_lastDistanceValue = distance;
       sendState(3);
       digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
     }
   #endif
+
+  Serial.println(".");
 }
-
-
 
 
 /********************************** START MAIN LOOP *****************************************/
@@ -419,6 +418,7 @@ void loop() {
 
   check_door_status(); // Check the sensors and publish any changes
 
+  //delay(500); // We have enabled Light sleep so this delay should reduce the power used
   delay(2000); // We have enabled Light sleep so this delay should reduce the power used
   //Serial.print(".");
 }

@@ -2,8 +2,10 @@ mqtt:
   broker: your.mqtt.ip.address
   port: 1883
   client_id: home-assistant-1
+  keepalive: 60
   username: YOURUSERNAME
   password: YOURPASSWORD
+  protocol: 3.1
 
 cover:
   - platform: mqtt

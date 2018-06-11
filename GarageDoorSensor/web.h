@@ -120,7 +120,7 @@ void ServeWebClients()
   #if DOOR3_ENABLED == true
     // DOOR 3
     dst = getState(door3_lastDistanceValue);
-    inString += F("<h3 class='ui-bar ui-bar-a ui-corner-all'>Door 2</h3>");
+    inString += F("<h3 class='ui-bar ui-bar-a ui-corner-all'>Door 3</h3>");
     inString += F("<table><tr><td><b>Door&nbsp;State:<br></td><td><label id='lbl_status' ");
     if (dst == DOOR_OPENED) {
       inString += F("style='color:red;'>OPEN");

@@ -29,6 +29,10 @@ This code also supports remote uploading to the ESP8266 using Arduino's OTA libr
 ![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/Wiring%20Diagram.png?raw=true "Wiring Diagram")
 
 
+#### Web page
+![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/WebpageStatus.png?raw=true "Wiring Diagram")
+
+
 #### Sample MQTT commands
 Listen to MQTT commands
 > mosquitto_sub -h 172.17.0.1 -t '#'

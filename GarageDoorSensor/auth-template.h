@@ -21,13 +21,13 @@
 #define ULTRASONIC_TIMEOUT 40000 // µs
 #define VERIFICATION_INTERVAL 30 // ms that the state must stay the same before it is reported
 #define RELAY_ACTIVE_TIMEOUT 500 // ms the time the relay will close to actuate the door opener
-#define DOOR_TRIG_PIN 10 // SD3 on ESP8266
+#define DOOR_TRIG_PIN 2 // D4 on ESP8266
 
 // Door 1 Parameters
 #define DOOR1_ALIAS "Door 1"
 #define MQTT_DOOR1_ACTION_TOPIC WIFI_HOSTNAME "/1/action"
 #define MQTT_DOOR1_STATUS_TOPIC WIFI_HOSTNAME "/1/status"
-#define DOOR1_RELAY_PIN 5 // D1 on ESP8266
+#define DOOR1_RELAY_PIN 10 // SD3 on ESP8266
 #define DOOR1_ECHO_PIN 14 // D5 on ESP8266
 
 // Door 2 Parameters
@@ -43,7 +43,7 @@
 #define DOOR3_ALIAS "Door 3"
 #define MQTT_DOOR3_ACTION_TOPIC WIFI_HOSTNAME "/3/action"
 #define MQTT_DOOR3_STATUS_TOPIC WIFI_HOSTNAME "/3/status"
-#define DOOR3_RELAY_PIN 0 // D3 on ESP8266
+#define DOOR3_RELAY_PIN 5 // D1 on ESP8266
 #define DOOR3_ECHO_PIN 13 // D7 on ESP8266
 
 #endif
