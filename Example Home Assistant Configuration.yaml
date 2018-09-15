@@ -7,6 +7,19 @@ mqtt:
   password: YOURPASSWORD
   protocol: 3.1
 
+sensor:
+ - platform: mqtt
+   state_topic: "GarDoor/temperature"
+   name: "Garage Temperature"
+   qos: 0
+   unit_of_measurement: '°F'
+
+ - platform: mqtt
+   state_topic: "GarDoor/humidity"
+   name: "Garage Humidity"
+   qos: 0
+   unit_of_measurement: '%'
+
 cover:
   - platform: mqtt
     name: "Garage Door 1"
