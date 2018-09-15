@@ -83,12 +83,10 @@ void ServeWebClients()
   inString += F("<tr><td><b>Distance:</b></td><td><label id='lbl_dist'>");
   inString += String(door1_lastDistanceValue);
   inString += F(" (cm)</label></td><td></td></tr>");
-  inString += F("</table><br />");
-  inString += F("<tr><td><b>Temp:</b></td><td><label id='lbl_dist'>");
+  inString += F("<tr><td><b>Temp: </b></td><td><label id='lbl_dist'>");
   inString += String(tmp* 1.8 + 32);
   inString += F(" °F</label></td><td></td></tr>");
-  inString += F("</table><br />");
-  inString += F("<tr><td><b>Humidity:</b></td><td><label id='lbl_dist'>");
+  inString += F("<tr><td><b>Humidity: </b></td><td><label id='lbl_dist'>");
   inString += String(hum);
   inString += F(" %</label></td><td></td></tr>");
   inString += F("</table><br />");
