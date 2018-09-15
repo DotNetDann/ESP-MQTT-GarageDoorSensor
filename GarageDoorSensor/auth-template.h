@@ -13,6 +13,16 @@
 #define MQTT_PORT 1883
 #define MQTT_AVAIL_TOPIC WIFI_HOSTNAME "/availability"
 
+// DHT Parameters
+#define DHTPIN 13 // D7 on ESP8266
+#define DHTTYPE DHT22 // or: DHT21 or DHT22
+#define MQTT_TEMPERATURE_TOPIC WIFI_HOSTNAME "/temperature"
+#define MQTT_HUMIDITY_TOPIC WIFI_HOSTNAME "/humidity"
+#define DHT_PUBLISH_INTERVAL 300
+#define DHT_TEMPERATURE_CELSIUS false
+#define DHT_TEMPERATURE_ALIAS "Garage Temperature"
+#define DHT_HUMIDITY_ALIAS "Garage Humidity"
+
 #define OTApassword "ota password" //the password you will need to enter to upload remotely via the ArduinoIDE
 #define OTAport 8266
 
