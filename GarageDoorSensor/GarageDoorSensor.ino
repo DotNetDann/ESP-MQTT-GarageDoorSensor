@@ -432,9 +432,14 @@ void dht_read_publish() {
 
   boolean celsius = DHT_TEMPERATURE_CELSIUS;
   float temp;
-  temp = (tempRaw * 1.8 + 32);
+  if (celsius) {
+    temp = tempRaw;
+  }
+  else {
+    temp = (tempRaw * 1.8 + 32);
+  }
 
-  char payload[4];
+char payload[4];
 
   // Publish the temperature payload via MQTT
   dtostrf(temp, 4, 0, payload);

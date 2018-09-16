@@ -84,8 +84,14 @@ void ServeWebClients()
   inString += String(door1_lastDistanceValue);
   inString += F(" (cm)</label></td><td></td></tr>");
   inString += F("<tr><td><b>Temp: </b></td><td><label id='lbl_dist'>");
-  inString += String(tmp* 1.8 + 32);
-  inString += F(" °F</label></td><td></td></tr>");
+  if (DHT_TEMPERATURE_CELSIUS) {
+      inString += String(tmp);
+      inString += F(" °C</label></td><td></td></tr>");
+  }
+  else {
+      inString += String(tmp* 1.8 + 32);
+      inString += F(" °F</label></td><td></td></tr>");
+  }
   inString += F("<tr><td><b>Humidity: </b></td><td><label id='lbl_dist'>");
   inString += String(hum);
   inString += F(" %</label></td><td></td></tr>");
