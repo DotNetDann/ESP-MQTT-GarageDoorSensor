@@ -19,7 +19,7 @@
 // ------------------------------
 // ---- all config in auth.h ----
 // ------------------------------
-#define VERSION F("v1.4 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
+#define VERSION F("v1.4 - GarDoor - https://github.com/Iceman73")
 
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
