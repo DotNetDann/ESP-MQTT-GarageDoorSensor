@@ -6,25 +6,27 @@
         - Next, download the ESP8266 dependencies by going to Tools -> Board -> Board Manager and searching for ESP8266 and installing it.
 
   - You will also need to download the follow libraries by going to Sketch -> Include Libraries -> Manage Libraries
-      - Ultrasonic by Erick Simões
+      - NewPing
       - PubSubClient
       - ArduinoJSON
 
   - Another like project https://hackaday.io/project/25090/instructions
+  - Where this code was forked from https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor
 */
+// 1.4 Changes to use NewPing
 // 1.3 adds DHT Sensor for Temp and Humidty
 
 // ------------------------------
 // ---- all config in auth.h ----
 // ------------------------------
-#define VERSION F("v1.3 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
+#define VERSION F("v1.4 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
 
 #include <ArduinoJson.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
 #include <PubSubClient.h>
-#include <Ultrasonic.h> // Ultrasonic by Erick Simões
+#include <NewPing.h> // Ultrasonic
 #include <ArduinoOTA.h>
 #include <DHT.h>
 #include <Adafruit_Sensor.h>
@@ -34,7 +36,8 @@
 #define DOOR_OPENED          0x01
 #define DOOR_CLOSEDNOCAR     0x02
 #define DOOR_CLOSEDWITHCAR   0x03
-#define D3 0 // Code for DHT Pin
+#define SONAR_NUM 3      // Number of sensors.
+
 
 /**************************************** GLOBALS ***************************************/
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(10);
@@ -49,9 +52,12 @@ const char* lwtMessage = "offline";
 
 /******************************** GLOBAL OBJECTS *******************************/
 
-Ultrasonic ultrasonic1(DOOR_TRIG_PIN, DOOR1_ECHO_PIN, ULTRASONIC_TIMEOUT);
-Ultrasonic ultrasonic2(DOOR_TRIG_PIN, DOOR2_ECHO_PIN, ULTRASONIC_TIMEOUT);
-Ultrasonic ultrasonic3(DOOR_TRIG_PIN, DOOR3_ECHO_PIN, ULTRASONIC_TIMEOUT);
+NewPing sonar[SONAR_NUM] = {   // Sensor object array.
+  NewPing(DOOR_TRIG_PIN, DOOR1_ECHO_PIN, ULTRASONIC_MAX_DISTANCE), // Each sensor's trigger pin, echo pin, and max distance to ping. 0-2
+  NewPing(DOOR_TRIG_PIN, DOOR2_ECHO_PIN, ULTRASONIC_MAX_DISTANCE), 
+  NewPing(DOOR_TRIG_PIN, DOOR3_ECHO_PIN, ULTRASONIC_MAX_DISTANCE)
+};
+
 WiFiClient espClient;
 PubSubClient client(espClient);
 ESP8266WebServer server(80);
@@ -352,10 +358,10 @@ void reconnect() {
 void check_door_status() {
 
   // ---- Door 1 ----
-  int distance = ultrasonic1.distanceRead();
+  int distance = sonar[0].ping_cm();
   byte state = getState(distance);
   delay(VERIFICATION_INTERVAL);
-  byte stateVerify = getState(ultrasonic1.distanceRead());
+  byte stateVerify = getState(sonar[0].ping_cm());
 
   Serial.print(distance);
   Serial.print(".");
@@ -370,10 +376,10 @@ void check_door_status() {
 
   // ---- Door 2 ----
   #if DOOR2_ENABLED == true
-    distance = ultrasonic2.distanceRead();
+    distance = sonar[1].ping_cm();
     state = getState(distance);
     delay(VERIFICATION_INTERVAL);
-    stateVerify = getState(ultrasonic2.distanceRead());
+    stateVerify = getState(sonar[1].ping_cm());
 
     Serial.print(distance);
     Serial.print(".");
@@ -389,10 +395,10 @@ void check_door_status() {
 
   // ---- Door 3 ----
   #if DOOR3_ENABLED == true
-    distance = ultrasonic3.distanceRead();
+    distance = sonar[2].ping_cm();
     state = getState(distance);
     delay(VERIFICATION_INTERVAL);
-    stateVerify = getState(ultrasonic3.distanceRead());
+    stateVerify = getState(sonar[2].ping_cm());
 
     Serial.print(distance);
     Serial.print(".");

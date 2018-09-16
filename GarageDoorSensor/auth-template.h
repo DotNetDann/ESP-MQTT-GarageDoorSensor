@@ -3,10 +3,12 @@
 #ifndef _AUTH_DETAILS
 #define _AUTH_DETAILS
 
+// Wifi Settings
 #define WIFI_HOSTNAME "GarDoor"
 #define WIFI_SSID "ssid"
 #define WIFI_PASSWORD "password"
 
+// MQTT Settings
 #define MQTT_SERVER "mqtt server ip"
 #define MQTT_USER ""
 #define MQTT_PASSWORD ""
@@ -23,9 +25,12 @@
 #define DHT_TEMPERATURE_ALIAS "Garage Temperature"
 #define DHT_HUMIDITY_ALIAS "Garage Humidity"
 
+// OTA Settings for pushing updated software
 #define OTApassword "ota password" //the password you will need to enter to upload remotely via the ArduinoIDE
 #define OTAport 8266
 
+// Distance Parameters
+#define ULTRASONIC_MAX_DISTANCE 400 // Maximum distance (in cm) to ping.
 #define ULTRASONIC_DIST_MAX_OPEN 70 // cm
 #define ULTRASONIC_DIST_MAX_CAR 120 // cm
 #define ULTRASONIC_TIMEOUT 40000 // µs
@@ -41,7 +46,7 @@
 #define DOOR1_ECHO_PIN 14 // D5 on ESP8266
 
 // Door 2 Parameters
-#define DOOR2_ENABLED true
+#define DOOR2_ENABLED false
 #define DOOR2_ALIAS "Door 2"
 #define MQTT_DOOR2_ACTION_TOPIC WIFI_HOSTNAME "/2/action"
 #define MQTT_DOOR2_STATUS_TOPIC WIFI_HOSTNAME "/2/status"
@@ -49,7 +54,7 @@
 #define DOOR2_ECHO_PIN 12 // D6 on ESP8266
 
 // Door 3 Parameters
-#define DOOR3_ENABLED true
+#define DOOR3_ENABLED false
 #define DOOR3_ALIAS "Door 3"
 #define MQTT_DOOR3_ACTION_TOPIC WIFI_HOSTNAME "/3/action"
 #define MQTT_DOOR3_STATUS_TOPIC WIFI_HOSTNAME "/3/status"
