@@ -40,6 +40,10 @@ More information on OTA uploading can be found [here](http://esp8266.github.io/A
 ![alt text](https://github.com/iceman73/ESP-MQTT-GarageDoorSensor/blob/master/WebpageStatus.png?raw=true "Webpage Status")
 
 
+#### Completed Project
+![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/CompletedProject.jpg?raw=true "Completed Project")
+
+
 #### Sample MQTT commands
 Listen to MQTT commands
 > mosquitto_sub -h 172.17.0.1 -t '#'
