@@ -55,6 +55,8 @@ void ServeWebClients()
 
   // DOOR 1
   byte dst = getState(door1_lastDistanceValue);
+  byte tmp = dht.readTemperature();
+  byte hum = dht.readHumidity();
   inString += F("<h3 class='ui-bar ui-bar-a ui-corner-all'>Door 1</h3>");
   inString += F("<table><tr><td><b>Door&nbsp;State:<br></td><td><label id='lbl_status' ");
   if (dst == DOOR_OPENED) {
@@ -81,8 +83,19 @@ void ServeWebClients()
   inString += F("<tr><td><b>Distance:</b></td><td><label id='lbl_dist'>");
   inString += String(door1_lastDistanceValue);
   inString += F(" (cm)</label></td><td></td></tr>");
+  inString += F("<tr><td><b>Temp: </b></td><td><label id='lbl_dist'>");
+  if (DHT_TEMPERATURE_CELSIUS) {
+      inString += String(tmp);
+      inString += F(" °C</label></td><td></td></tr>");
+  }
+  else {
+      inString += String(tmp* 1.8 + 32);
+      inString += F(" °F</label></td><td></td></tr>");
+  }
+  inString += F("<tr><td><b>Humidity: </b></td><td><label id='lbl_dist'>");
+  inString += String(hum);
+  inString += F(" %</label></td><td></td></tr>");
   inString += F("</table><br />");
-  
   
   #if DOOR2_ENABLED == true
     // DOOR 2
