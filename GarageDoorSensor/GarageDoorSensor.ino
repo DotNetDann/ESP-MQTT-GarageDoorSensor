@@ -19,17 +19,17 @@
 // ------------------------------
 // ---- all config in auth.h ----
 // ------------------------------
-#define VERSION F("v1.4 - GarDoor - https://github.com/Iceman73")
+#define VERSION F("v1.5 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
 
-#include <ArduinoJson.h>
+#include <ArduinoJson.h> // Benoit Blanchon
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
-#include <PubSubClient.h>
-#include <NewPing.h> // Ultrasonic
+#include <PubSubClient.h> // Nick O'Leary
+#include <NewPing.h> // Tim Eckel
 #include <ArduinoOTA.h>
-#include <DHT.h>
-#include <Adafruit_Sensor.h>
+#include <DHT.h> // Adafruit
+#include <Adafruit_Sensor.h> // Adafruit Unified Sensor
 #include "auth.h"
 
 #define DOOR_UNKNOWN         0x00
@@ -50,6 +50,11 @@ int door3_lastDistanceValue = 0;
 char* birthMessage = "online";
 const char* lwtMessage = "offline";
 
+const char* dhtTempTopic = MQTT_TEMPERATURE_TOPIC;
+const char* dhtHumTopic = MQTT_HUMIDITY_TOPIC;
+const unsigned long dht_publish_interval_s = DHT_PUBLISH_INTERVAL;
+unsigned long dht_lastReadTime = -1000;
+
 /******************************** GLOBAL OBJECTS *******************************/
 
 NewPing sonar[SONAR_NUM] = {   // Sensor object array.
@@ -61,12 +66,7 @@ NewPing sonar[SONAR_NUM] = {   // Sensor object array.
 WiFiClient espClient;
 PubSubClient client(espClient);
 ESP8266WebServer server(80);
-const char* dhtTempTopic = MQTT_TEMPERATURE_TOPIC;
-const char* dhtHumTopic = MQTT_HUMIDITY_TOPIC;
-const unsigned long dht_publish_interval_s = DHT_PUBLISH_INTERVAL;
-unsigned long dht_lastReadTime = -1000;
-
-DHT dht(DHTPIN, DHTTYPE);
+DHT dht(DHT_PIN, DHT_TYPE);
 
 // Get the state of the garage based upon the sensor distance
 byte getState(int distance)
@@ -95,7 +95,7 @@ void setup() {
 
   // Setup Door 1 pins
   pinMode(DOOR1_RELAY_PIN, OUTPUT);
-  digitalWrite(DOOR1_RELAY_PIN, LOW);
+  digitalWrite(DOOR1_RELAY_PIN, HIGH);
 
   #if DOOR2_ENABLED == true
     pinMode(DOOR2_RELAY_PIN, OUTPUT);
@@ -296,9 +296,9 @@ void Publish(char* topic, char* message) {
 
 /********************************** START RELAY *****************************************/
 void toggleRelay(int pin) {
-    digitalWrite(pin, HIGH);
-    delay(RELAY_ACTIVE_TIMEOUT);
     digitalWrite(pin, LOW);
+    delay(RELAY_ACTIVE_TIMEOUT);
+    digitalWrite(pin, HIGH);
 }
 
 
@@ -340,9 +340,7 @@ void reconnect() {
       door2_lastDistanceValue = 0;
       door3_lastDistanceValue = 0;
       check_door_status();
-      //dht Sensor
-      dht_read_publish();
- 
+       
     } else {
       Serial.print(F("failed, rc="));
       Serial.print(client.state());
@@ -434,12 +432,11 @@ void dht_read_publish() {
   float temp;
   if (celsius) {
     temp = tempRaw;
-  }
-  else {
+  } else {
     temp = (tempRaw * 1.8 + 32);
   }
-
-char payload[4];
+  
+  char payload[4];
 
   // Publish the temperature payload via MQTT
   dtostrf(temp, 4, 0, payload);
@@ -453,11 +450,11 @@ char payload[4];
   dtostrf(hum, 4, 0, payload);
   Serial.print("Publishing DHT Humidity payload: ");
   Serial.print(payload);
-Serial.print(" to ");
+  Serial.print(" to ");
   Serial.print(dhtHumTopic);
   Serial.println("...");
+  
   client.publish(dhtHumTopic, payload, false);
-
 }
 
 
@@ -484,12 +481,15 @@ void loop() {
   server.handleClient(); // Check Web page requests
 
   check_door_status(); // Check the sensors and publish any changes
-
-  if (currentTime - dht_lastReadTime > (dht_publish_interval_s * 1000)) {
+  
+  #if DHT_ENABLED == true
+    if (currentTime - dht_lastReadTime > (dht_publish_interval_s * 1000)) {
       dht_read_publish();
       dht_lastReadTime = millis();
-   }
-   //delay(500); // We have enabled Light sleep so this delay should reduce the power used
+    }
+  #endif
+   
+  //delay(500); // We have enabled Light sleep so this delay should reduce the power used
   delay(2000); // We have enabled Light sleep so this delay should reduce the power used
   //Serial.print(".");
 }

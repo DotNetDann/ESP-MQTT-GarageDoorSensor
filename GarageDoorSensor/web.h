@@ -55,8 +55,6 @@ void ServeWebClients()
 
   // DOOR 1
   byte dst = getState(door1_lastDistanceValue);
-  byte tmp = dht.readTemperature();
-  byte hum = dht.readHumidity();
   inString += F("<h3 class='ui-bar ui-bar-a ui-corner-all'>Door 1</h3>");
   inString += F("<table><tr><td><b>Door&nbsp;State:<br></td><td><label id='lbl_status' ");
   if (dst == DOOR_OPENED) {
@@ -83,18 +81,23 @@ void ServeWebClients()
   inString += F("<tr><td><b>Distance:</b></td><td><label id='lbl_dist'>");
   inString += String(door1_lastDistanceValue);
   inString += F(" (cm)</label></td><td></td></tr>");
-  inString += F("<tr><td><b>Temp: </b></td><td><label id='lbl_dist'>");
+  
+  #if DHT_ENABLED == true
+  byte tmp = dht.readTemperature();
+  byte hum = dht.readHumidity();
+  inString += F("<tr><td><b>Temp: </b></td><td><label id='lbl_temp'>");
   if (DHT_TEMPERATURE_CELSIUS) {
       inString += String(tmp);
-      inString += F(" °C</label></td><td></td></tr>");
-  }
-  else {
+      inString += F(" &#176;C</label></td><td></td></tr>");
+  } else {
       inString += String(tmp* 1.8 + 32);
-      inString += F(" °F</label></td><td></td></tr>");
+      inString += F(" &#176;F</label></td><td></td></tr>");
   }
-  inString += F("<tr><td><b>Humidity: </b></td><td><label id='lbl_dist'>");
+  inString += F("<tr><td><b>Humidity: </b></td><td><label id='lbl_hum'>");
   inString += String(hum);
   inString += F(" %</label></td><td></td></tr>");
+  #endif
+  
   inString += F("</table><br />");
   
   #if DOOR2_ENABLED == true
@@ -205,7 +208,7 @@ void ServeWebClients()
 
   inString += F("<tr><td><b>Ultrasonic Read Timeout:</b></td><td><label id='lbl_rssi'>");
   inString += ULTRASONIC_TIMEOUT;
-  inString += F(" µs</label></td></tr>");
+  inString += F(" &#181;s</label></td></tr>");
 
   inString += F("<tr><td><b>Ultrasonic Distance Max Open:</b></td><td><label id='lbl_rssi'>");
   inString += ULTRASONIC_DIST_MAX_OPEN;
@@ -237,6 +240,16 @@ void ServeWebClients()
   inString += F(" disabled><label for='cb3'>");
   inString += DOOR3_ALIAS;
   inString += F("</label></td></tr>");
+
+  inString += F("<tr><td colspan='2'><input type='checkbox' id='cb4' ");
+  #if DHT_ENABLED == true
+    inString += F("checked");
+  #endif
+  inString += F(" disabled><label for='cb4'>");
+  inString += DHT_TEMPERATURE_ALIAS;
+  inString += F(" & ");
+  inString += DHT_HUMIDITY_ALIAS;
+  inString += F("</label></td></tr>"); 
   
   inString += F("</table>");
   inString += F("</div>");
