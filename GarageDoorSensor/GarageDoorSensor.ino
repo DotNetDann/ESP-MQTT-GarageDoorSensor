@@ -13,13 +13,16 @@
   - Another like project https://hackaday.io/project/25090/instructions
   - Where this code was forked from https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor
 */
+
+// 1.7 Add ability to only close garage doors
+// 1.6 Add diagnose infomation on distances
 // 1.4 Changes to use NewPing
 // 1.3 adds DHT Sensor for Temp and Humidty
 
 // ------------------------------
 // ---- all config in auth.h ----
 // ------------------------------
-#define VERSION F("v1.5 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
+#define VERSION F("v1.7 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
 
 #include <ArduinoJson.h> // Benoit Blanchon
 #include <ESP8266WiFi.h>
@@ -43,6 +46,10 @@
 const int BUFFER_SIZE = JSON_OBJECT_SIZE(10);
 #define MQTT_MAX_PACKET_SIZE 512
 
+const int door_numValues = 10;
+int door1_lastDistanceValues[door_numValues];
+int door2_lastDistanceValues[door_numValues];
+int door3_lastDistanceValues[door_numValues];
 int door1_lastDistanceValue = 0;
 int door2_lastDistanceValue = 0;
 int door3_lastDistanceValue = 0;
@@ -190,24 +197,59 @@ void callback(char* topic, byte* payload, unsigned int length) {
   // Action Command
   if (payloadToProcess == "OPEN") {
     Serial.print(F("Triggering OPEN relay!"));
-    if (topicToProcess == MQTT_DOOR1_ACTION_TOPIC) {
+
+    if (topicToProcess == MQTT_DOOR1_ACTION_TOPIC && // Door 1
+         (getState(door1_lastDistanceValue) == DOOR_CLOSEDNOCAR || getState(door1_lastDistanceValue) == DOOR_CLOSEDWITHCAR) && // Garage is currently closed
+         door1_lastDistanceValues[0] > 0 && // Last value was valid (Known state)
+         !DOOR1_LIMIT_RELAY_CLOSE) { // We are not limiting the open command
       toggleRelay(DOOR1_RELAY_PIN);
-    } else if (topicToProcess == MQTT_DOOR2_ACTION_TOPIC) {
+      Serial.print(F("Door1 relay OPEN!"));
+      
+    } else if (topicToProcess == MQTT_DOOR2_ACTION_TOPIC && // Door 2
+         (getState(door2_lastDistanceValue) == DOOR_CLOSEDNOCAR || getState(door2_lastDistanceValue) == DOOR_CLOSEDWITHCAR) && // Garage is currently closed
+         door2_lastDistanceValues[0] > 0 && // Last value was valid (Known state)
+         !DOOR2_LIMIT_RELAY_CLOSE) { // We are not limiting the open command
       toggleRelay(DOOR2_RELAY_PIN);
-    } else if (topicToProcess == MQTT_DOOR3_ACTION_TOPIC) {
+      Serial.print(F("Door2 relay OPEN!"));
+      
+    } else if (topicToProcess == MQTT_DOOR3_ACTION_TOPIC && // Door 3
+         (getState(door3_lastDistanceValue) == DOOR_CLOSEDNOCAR || getState(door3_lastDistanceValue) == DOOR_CLOSEDWITHCAR) && // Garage is currently closed
+         door3_lastDistanceValues[0] > 0 && // Last value was valid (Known state)
+         !DOOR3_LIMIT_RELAY_CLOSE) { // We are not limiting the open command
       toggleRelay(DOOR3_RELAY_PIN);
+      Serial.print(F("Door3 relay OPEN!"));
+
+    } else {
+      Serial.print(F("criteria not meet!"));
     }
+    
     Serial.println(" -> DONE");
   }
   else if (payloadToProcess == "CLOSE") {
     Serial.print(F("Triggering CLOSE relay!"));
-    if (topicToProcess == MQTT_DOOR1_ACTION_TOPIC) {
+    
+    if (topicToProcess == MQTT_DOOR1_ACTION_TOPIC && 
+         getState(door1_lastDistanceValue) == DOOR_OPENED &&  // Garage is currently OPEN
+         door1_lastDistanceValues[0] > 0) { // Last value was valid (Known state)
       toggleRelay(DOOR1_RELAY_PIN);
-    } else if (topicToProcess == MQTT_DOOR2_ACTION_TOPIC) {
+      Serial.print(F("Door1 relay CLOSED!"));
+
+    } else if (topicToProcess == MQTT_DOOR2_ACTION_TOPIC && 
+         getState(door2_lastDistanceValue) == DOOR_OPENED &&  // Garage is currently OPEN
+         door2_lastDistanceValues[0] > 0) { // Last value was valid (Known state)
       toggleRelay(DOOR2_RELAY_PIN);
-    } else if (topicToProcess == MQTT_DOOR3_ACTION_TOPIC) {
+      Serial.print(F("Door2 relay CLOSED!"));
+
+    } else if (topicToProcess == MQTT_DOOR3_ACTION_TOPIC && 
+         getState(door3_lastDistanceValue) == DOOR_OPENED &&  // Garage is currently OPEN
+         door3_lastDistanceValues[0] > 0) { // Last value was valid (Known state)
       toggleRelay(DOOR3_RELAY_PIN);
+      Serial.print(F("Door3 relay CLOSED!"));
+
+    } else {
+      Serial.print(F("criteria not meet!"));
     }
+
     Serial.println(F(" -> DONE"));
   }
   else if (payloadToProcess == "STATE") {
@@ -354,58 +396,101 @@ void reconnect() {
 
 /********************************** START DOOR STATUS *****************************************/
 void check_door_status() {
+  byte state;
+  byte stateVerify;
+  int distance = 0;
+  int lastDistance = 0;
 
   // ---- Door 1 ----
-  int distance = sonar[0].ping_cm();
-  byte state = getState(distance);
-  delay(VERIFICATION_INTERVAL);
-  byte stateVerify = getState(sonar[0].ping_cm());
-
+  distance = sonar[0].ping_cm(); // Take a reading
   Serial.print(distance);
   Serial.print(".");
 
-  if ((distance > 0) && (state == stateVerify) && (state != getState(door1_lastDistanceValue))) {
-    digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
-    door1_lastDistanceValue = distance;
-    sendState(1);
-    digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
+  memmove(&door1_lastDistanceValues[1], &door1_lastDistanceValues[0], (door_numValues - 1) * sizeof(door1_lastDistanceValues[0])); // Move the array forward
+  door1_lastDistanceValues[0] = distance;
+
+  // Find the previous distance that was valid
+  lastDistance = 0;
+  for (int y=1; y<door_numValues; y++) {
+    if (door1_lastDistanceValues[y] > 0) {
+      lastDistance = door1_lastDistanceValues[y];
+      break;
+    }
+  }
+
+  if ((distance > 0) && (lastDistance > 0)) {
+    state = getState(distance);
+    stateVerify = getState(lastDistance);
+    
+    if ((state == stateVerify) && (state != getState(door1_lastDistanceValue))) {
+      digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
+      door1_lastDistanceValue = distance;
+      sendState(1);
+      digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
+    }
   }
 
 
   // ---- Door 2 ----
   #if DOOR2_ENABLED == true
-    distance = sonar[1].ping_cm();
-    state = getState(distance);
-    delay(VERIFICATION_INTERVAL);
-    stateVerify = getState(sonar[1].ping_cm());
-
+    distance = sonar[1].ping_cm(); // Take a reading
     Serial.print(distance);
     Serial.print(".");
 
-    if ((distance > 0) && (state == stateVerify) && (state != getState(door2_lastDistanceValue))) {
-      digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
-      door2_lastDistanceValue = distance;
-      sendState(2);
-      digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
+    memmove(&door2_lastDistanceValues[1], &door2_lastDistanceValues[0], (door_numValues - 1) * sizeof(door2_lastDistanceValues[0])); // Move the array forward
+    door2_lastDistanceValues[0] = distance;
+  
+    // Find the previous distance that was valid
+    lastDistance = 0;
+    for (int y=1; y<door_numValues; y++) {
+      if (door2_lastDistanceValues[y] > 0) {
+        lastDistance = door2_lastDistanceValues[y];
+        break;
+      }
+    }
+  
+    if ((distance > 0) && (lastDistance > 0)) {
+      state = getState(distance);
+      stateVerify = getState(lastDistance);
+      
+      if ((state == stateVerify) && (state != getState(door2_lastDistanceValue))) {
+        digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
+        door2_lastDistanceValue = distance;
+        sendState(2);
+        digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
+      }
     }
   #endif
 
 
   // ---- Door 3 ----
   #if DOOR3_ENABLED == true
-    distance = sonar[2].ping_cm();
-    state = getState(distance);
-    delay(VERIFICATION_INTERVAL);
-    stateVerify = getState(sonar[2].ping_cm());
-
+    distance = sonar[2].ping_cm(); // Take a reading
     Serial.print(distance);
     Serial.print(".");
 
-    if ((distance > 0) && (state == stateVerify) && (state != getState(door3_lastDistanceValue))) {
-      digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
-      door3_lastDistanceValue = distance;
-      sendState(3);
-      digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
+    memmove(&door3_lastDistanceValues[1], &door3_lastDistanceValues[0], (door_numValues - 1) * sizeof(door3_lastDistanceValues[0])); // Move the array forward
+    door3_lastDistanceValues[0] = distance;
+  
+    // Find the previous distance that was valid
+    lastDistance = 0;
+    for (int y=1; y<door_numValues; y++) {
+      if (door3_lastDistanceValues[y] > 0) {
+        lastDistance = door3_lastDistanceValues[y];
+        break;
+      }
+    }
+  
+    if ((distance > 0) && (lastDistance > 0)) {
+      state = getState(distance);
+      stateVerify = getState(lastDistance);
+      
+      if ((state == stateVerify) && (state != getState(door3_lastDistanceValue))) {
+        digitalWrite(LED_BUILTIN, LOW);     // Turn the status LED on
+        door3_lastDistanceValue = distance;
+        sendState(3);
+        digitalWrite(LED_BUILTIN, HIGH);     // Turn the status LED off
+      }
     }
   #endif
 

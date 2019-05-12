@@ -23,8 +23,6 @@
 #define ULTRASONIC_MAX_DISTANCE 400 // Maximum distance (in cm) to ping.
 #define ULTRASONIC_DIST_MAX_OPEN 70 // cm
 #define ULTRASONIC_DIST_MAX_CAR 120 // cm
-#define ULTRASONIC_TIMEOUT 40000 // µs
-#define VERIFICATION_INTERVAL 30 // ms that the state must stay the same before it is reported
 #define RELAY_ACTIVE_TIMEOUT 500 // ms the time the relay will close to actuate the door opener
 #define DOOR_TRIG_PIN 2 // D4 on ESP8266
 
@@ -34,6 +32,7 @@
 #define MQTT_DOOR1_STATUS_TOPIC WIFI_HOSTNAME "/1/status"
 #define DOOR1_RELAY_PIN 10 // SD3 on ESP8266
 #define DOOR1_ECHO_PIN 14 // D5 on ESP8266
+#define DOOR1_LIMIT_RELAY_CLOSE false
 
 // Door 2 Parameters
 #define DOOR2_ENABLED true
@@ -42,6 +41,7 @@
 #define MQTT_DOOR2_STATUS_TOPIC WIFI_HOSTNAME "/2/status"
 #define DOOR2_RELAY_PIN 4 // D2 on ESP8266
 #define DOOR2_ECHO_PIN 12 // D6 on ESP8266
+#define DOOR2_LIMIT_RELAY_CLOSE false
 
 // Door 3 Parameters
 #define DOOR3_ENABLED true
@@ -50,9 +50,10 @@
 #define MQTT_DOOR3_STATUS_TOPIC WIFI_HOSTNAME "/3/status"
 #define DOOR3_RELAY_PIN 5 // D1 on ESP8266
 #define DOOR3_ECHO_PIN 13 // D7 on ESP8266
+#define DOOR3_LIMIT_RELAY_CLOSE false
 
 // DHT Parameters
-#define DHT_ENABLED true
+#define DHT_ENABLED false
 #define DHT_PIN 15 // D8 on ESP8266
 #define DHT_TYPE DHT22 // or: DHT21 or DHT22
 #define MQTT_TEMPERATURE_TOPIC WIFI_HOSTNAME "/temperature"

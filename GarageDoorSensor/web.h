@@ -33,6 +33,7 @@ void ServeWebClients()
   inString += WIFI_HOSTNAME;
   inString += F("</title>");
   inString += F("<meta name='viewport' content='width=device-width, initial-scale=1'>");
+  inString += F("<meta http-equiv='refresh' content='15'>");
   inString += F("<link rel='stylesheet' href='http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.css' type='text/css'>");
   inString += F("<script src='http://code.jquery.com/jquery-1.9.1.min.js' type='text/javascript'></script>");
   inString += F("<script src='http://code.jquery.com/mobile/1.3.1/jquery.mobile-1.3.1.min.js' type='text/javascript'></script>");
@@ -80,7 +81,13 @@ void ServeWebClients()
   inString += F("</label></td></tr>");
   inString += F("<tr><td><b>Distance:</b></td><td><label id='lbl_dist'>");
   inString += String(door1_lastDistanceValue);
-  inString += F(" (cm)</label></td><td></td></tr>");
+  inString += F(" (cm)</label></td></tr>");
+  inString += F("<tr><td><b>Previous Reads:</b></td><td><label id='lbl_reads'>");
+  for (int y=0; y<door_numValues; y++) {
+    inString += String(door1_lastDistanceValues[y]);
+    inString += F(",");
+  }
+  inString += F("</label></td><td></td></tr>");
   
   #if DHT_ENABLED == true
   byte tmp = dht.readTemperature();
@@ -128,7 +135,13 @@ void ServeWebClients()
     inString += F("</label></td></tr>");
     inString += F("<tr><td><b>Distance:</b></td><td><label id='lbl_dist'>");
     inString += String(door2_lastDistanceValue);
-    inString += F(" (cm)</label></td><td></td></tr>");
+    inString += F(" (cm)</label></td></tr>");
+    inString += F("<tr><td><b>Previous Reads:</b></td><td><label id='lbl_reads'>");
+    for (int y=0; y<door_numValues; y++) {
+      inString += String(door2_lastDistanceValues[y]);
+      inString += F(",");
+    }
+    inString += F("</label></td><td></td></tr>");
     inString += F("</table><br />");
   #endif
 
@@ -161,7 +174,13 @@ void ServeWebClients()
     inString += F("</label></td></tr>");
     inString += F("<tr><td><b>Distance:</b></td><td><label id='lbl_dist'>");
     inString += String(door3_lastDistanceValue);
-    inString += F(" (cm)</label></td><td></td></tr>");
+    inString += F(" (cm)</label></td></tr>");
+    inString += F("<tr><td><b>Previous Reads:</b></td><td><label id='lbl_reads'>");
+    for (int y=0; y<door_numValues; y++) {
+      inString += String(door3_lastDistanceValues[y]);
+      inString += F(",");
+    }
+    inString += F("</label></td><td></td></tr>");
     inString += F("</table><br />");
   #endif
 
@@ -201,14 +220,6 @@ void ServeWebClients()
   inString += F("<tr><td><b>Relay Active Timeout:</b></td><td><label id='lbl_rssi'>");
   inString += RELAY_ACTIVE_TIMEOUT;
   inString += F(" ms</label></td></tr>");
-
-  inString += F("<tr><td><b>Ultrasonic Verification Interval:</b></td><td><label id='lbl_rssi'>");
-  inString += VERIFICATION_INTERVAL;
-  inString += F(" ms</label></td></tr>");
-
-  inString += F("<tr><td><b>Ultrasonic Read Timeout:</b></td><td><label id='lbl_rssi'>");
-  inString += ULTRASONIC_TIMEOUT;
-  inString += F(" &#181;s</label></td></tr>");
 
   inString += F("<tr><td><b>Ultrasonic Distance Max Open:</b></td><td><label id='lbl_rssi'>");
   inString += ULTRASONIC_DIST_MAX_OPEN;
