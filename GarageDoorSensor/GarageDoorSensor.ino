@@ -14,6 +14,7 @@
   - Where this code was forked from https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor
 */
 
+// 1.8 Change pins and small clean
 // 1.7 Add ability to only close garage doors
 // 1.6 Add diagnose infomation on distances
 // 1.4 Changes to use NewPing
@@ -22,7 +23,7 @@
 // ------------------------------
 // ---- all config in auth.h ----
 // ------------------------------
-#define VERSION F("v1.7 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
+#define VERSION F("v1.8 - GarDoor - https://github.com/DotNetDann - http://dotnetdan.info")
 
 #include <ArduinoJson.h> // Benoit Blanchon
 #include <ESP8266WiFi.h>
@@ -57,8 +58,6 @@ int door3_lastDistanceValue = 0;
 char* birthMessage = "online";
 const char* lwtMessage = "offline";
 
-const char* dhtTempTopic = MQTT_TEMPERATURE_TOPIC;
-const char* dhtHumTopic = MQTT_HUMIDITY_TOPIC;
 const unsigned long dht_publish_interval_s = DHT_PUBLISH_INTERVAL;
 unsigned long dht_lastReadTime = -1000;
 
@@ -112,6 +111,10 @@ void setup() {
   #if DOOR3_ENABLED == true
     pinMode(DOOR3_RELAY_PIN, OUTPUT);
     digitalWrite(DOOR3_RELAY_PIN, HIGH);
+  #endif
+
+  #if DHT_ENABLED == true
+    dht.begin();
   #endif
 
   setup_wifi();
@@ -263,6 +266,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       sendState(3);
     }
     Serial.println(F(" -> DONE"));
+  }
+  else if (payloadToProcess == "STOP") {
+    Serial.print(F("We don’t know status of door while moving!"));
   } else {
     Serial.println(F("Unknown command!"));
   }
@@ -433,6 +439,7 @@ void check_door_status() {
 
   // ---- Door 2 ----
   #if DOOR2_ENABLED == true
+    delay(ULTRASONIC_SETTLE_TIMEOUT); // Let the last ping settle
     distance = sonar[1].ping_cm(); // Take a reading
     Serial.print(distance);
     Serial.print(".");
@@ -465,6 +472,7 @@ void check_door_status() {
 
   // ---- Door 3 ----
   #if DOOR3_ENABLED == true
+    delay(ULTRASONIC_SETTLE_TIMEOUT); // Let the last ping settle
     distance = sonar[2].ping_cm(); // Take a reading
     Serial.print(distance);
     Serial.print(".");
@@ -520,26 +528,14 @@ void dht_read_publish() {
   } else {
     temp = (tempRaw * 1.8 + 32);
   }
-  
-  char payload[4];
 
-  // Publish the temperature payload via MQTT
+  // Publish the temperature and humidity payloads via MQTT
+  char payload[4];
   dtostrf(temp, 4, 0, payload);
-  Serial.print("Publishing DHT Temperature payload: ");
-  Serial.print(payload);
-  Serial.print(" to ");
-  Serial.print(dhtTempTopic);
-  Serial.println("...");
-  client.publish(dhtTempTopic, payload, false);
-  // Publish the humidity payload via MQTT
+  Publish(MQTT_TEMPERATURE_TOPIC, payload);
+
   dtostrf(hum, 4, 0, payload);
-  Serial.print("Publishing DHT Humidity payload: ");
-  Serial.print(payload);
-  Serial.print(" to ");
-  Serial.print(dhtHumTopic);
-  Serial.println("...");
-  
-  client.publish(dhtHumTopic, payload, false);
+  Publish(MQTT_HUMIDITY_TOPIC, payload); 
 }
 
 
@@ -575,6 +571,7 @@ void loop() {
   #endif
    
   //delay(500); // We have enabled Light sleep so this delay should reduce the power used
-  delay(2000); // We have enabled Light sleep so this delay should reduce the power used
+  delay(800); // We have enabled Light sleep so this delay should reduce the power used
+  //delay(2000); // We have enabled Light sleep so this delay should reduce the power used
   //Serial.print(".");
 }
