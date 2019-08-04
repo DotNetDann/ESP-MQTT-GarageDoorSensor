@@ -61,7 +61,7 @@
 #define MQTT_HUMIDITY_TOPIC WIFI_HOSTNAME "/humidity"
 #define DHT_PUBLISH_INTERVAL 300
 #define DHT_TEMPERATURE_CELSIUS true
-#define DHT_TEMPERATURE_ALIAS "Garage Temperature"
-#define DHT_HUMIDITY_ALIAS "Garage Humidity"
+#define DHT_TEMPERATURE_ALIAS "Temperature"
+#define DHT_HUMIDITY_ALIAS "Humidity"
 
 #endif

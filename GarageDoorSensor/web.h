@@ -92,7 +92,9 @@ void ServeWebClients()
   #if DHT_ENABLED == true
   byte tmp = dht.readTemperature();
   byte hum = dht.readHumidity();
-  inString += F("<tr><td><b>Temp: </b></td><td><label id='lbl_temp'>");
+  inString += F("<tr><td><b>");
+  inString += DHT_TEMPERATURE_ALIAS;
+  inString += F(": </b></td><td><label id='lbl_temp'>");
   if (DHT_TEMPERATURE_CELSIUS) {
       inString += String(tmp);
       inString += F(" &#176;C</label></td><td></td></tr>");
@@ -100,7 +102,9 @@ void ServeWebClients()
       inString += String(tmp* 1.8 + 32);
       inString += F(" &#176;F</label></td><td></td></tr>");
   }
-  inString += F("<tr><td><b>Humidity: </b></td><td><label id='lbl_hum'>");
+  inString += F("<tr><td><b>");
+  inString += DHT_HUMIDITY_ALIAS;
+  inString += F(": </b></td><td><label id='lbl_hum'>");
   inString += String(hum);
   inString += F(" %</label></td><td></td></tr>");
   #endif
