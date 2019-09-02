@@ -40,6 +40,8 @@ More information on OTA uploading can be found [here](http://esp8266.github.io/A
 
 #### Completed Project
 ![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/CompletedProject.jpg?raw=true "Completed Project")
+![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/InstalledProject1.jpg?raw=true "Installed")
+![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/InstalledProject2.jpg?raw=true "Installed")
 
 
 #### Sample MQTT commands
