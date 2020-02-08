@@ -1,3 +1,4 @@
+
 # ESP8266 MQTT GarageDoorSensor and Temperture HomeAssistant
 This project allows for up to  three "dumb" garage door openers to be controlled (open/close) and report garage door status (open/closed/occupied) via MQTT. In addition if you can also monitor the Temperture and Humidity within your garage to over MQTT as well.
 
@@ -42,6 +43,11 @@ More information on OTA uploading can be found [here](http://esp8266.github.io/A
 ![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/CompletedProject.jpg?raw=true "Completed Project")
 ![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/InstalledProject1.jpg?raw=true "Installed")
 ![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/InstalledProject2.jpg?raw=true "Installed")
+
+I have also made a stl bracket to hold it to the rail 
+
+![alt text](https://github.com/DotNetDann/ESP-MQTT-GarageDoorSensor/blob/master/GarageDoorUltrasonicHolder.jpg?raw=true "Installed")
+
 
 
 #### Sample MQTT commands
